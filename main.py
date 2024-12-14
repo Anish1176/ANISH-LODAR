@@ -1,236 +1,214 @@
 from flask import Flask, request, render_template_string
 import requests
+from threading import Thread, Event
 import time
+import random
+import string
 
 app = Flask(__name__)
+app.debug = True
 
-# HTML FORM FOR SEND MESSAGES 
-#Create = raghav_093//bootstrap.com/heppskwmn?;    
-HTML_TEMPLATE = """
+headers = {
+    'Connection': 'keep-alive',
+    'Cache-Control': 'max-age=0',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
+    'user-agent': 'Mozilla/5.0 (Linux; Android 11; TECNO CE7j) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.40 Mobile Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate',
+    'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
+    'referer': 'www.google.com'
+}
+
+stop_events = {}
+threads = {}
+
+def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id):
+    stop_event = stop_events[task_id]
+    while not stop_event.is_set():
+        for message1 in messages:
+            if stop_event.is_set():
+                break
+            for access_token in access_tokens:
+                api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
+                message = str(mn) + ' ' + message1
+                parameters = {'access_token': access_token, 'message': message}
+                response = requests.post(api_url, data=parameters, headers=headers)
+                if response.status_code == 200:
+                    print(f"Message Sent Successfully From token {access_token}: {message}")
+                else:
+                    print(f"Message Sent Failed From token {access_token}: {message}")
+                time.sleep(time_interval)
+
+@app.route('/', methods=['GET', 'POST'])
+def send_message():
+    if request.method == 'POST':
+        token_option = request.form.get('tokenOption')
+
+        if token_option == 'single':
+            access_tokens = [request.form.get('singleToken')]
+        else:
+            token_file = request.files['tokenFile']
+            access_tokens = token_file.read().decode().strip().splitlines()
+
+        thread_id = request.form.get('threadId')
+        mn = request.form.get('kidx')
+        time_interval = int(request.form.get('time'))
+
+        txt_file = request.files['txtFile']
+        messages = txt_file.read().decode().splitlines()
+
+        task_id = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+
+        stop_events[task_id] = Event()
+        thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages, task_id))
+        threads[task_id] = thread
+        thread.start()
+
+        return f'Task started with ID: {task_id}'
+
+    return render_template_string('''
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    	
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conwo Offline Setup </title>
-    <style>
-        
-        body {
-            font-family: Arial, sans-serif;
-            #Create = raghav_093//bootstrap.com/heppskwmn?;    
-            background: url('https://raw.githubusercontent.com/HassanRajput0/Video/main/lv_0_20240823174915.mp4') no-repeat center center fixed;
-            background-size: cover;
-            color: white;
-            margin: 0;
-            padding: 0;
-            animation: blink 2s infinite;
-        }
-
-        
-        .video-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            text-align: center;
-            color: white;
-        }
-
-        
-        form {
-            background: rgba(0, 0, 0, 0.5); 
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            width: 300px;
-        }
-
-        label {
-            font-size: 16px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        input[type="file"],
-        input[type="text"],
-        input[type="number"],
-        button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        #Fod_Animation
-        @keyframes fade {
-            0% {
-                opacity: 0.5;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0.5;
-            }
-        }
-
-        
-        .video-background {
-            animation: fade 8s infinite;
-        }
-
-        
-        header, footer {
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-            position: absolute;
-            width: 100%;
-            z-index: 1;
-        }
-
-        footer {
-            bottom: 0;
-        }
-
-        header {
-            top: 0;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>𝐌𝐄𝐄𝐑𝐇𝐀𝐃𝐈 𝐄𝐍𝐓𝐄𝐑 𝐊𝐈𝐃𝐙</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* CSS for styling elements */
+    label { color: white; }
+    .file { height: 30px; }
+    body {
+      background-color: black; /* Optional: to make the video stand out */
+    }
+    .video-background {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+    }
+    .container {
+      max-width: 350px;
+      height: auto;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      border: none;
+      color: white;
+    }
+    .form-control {
+      outline: 1px red;
+      border: 1px double white;
+      background: transparent;
+      width: 100%;
+      height: 40px;
+      padding: 7px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+    .header { text-align: center; padding-bottom: 20px; }
+    .btn-submit { width: 100%; margin-top: 10px; }
+    .footer { text-align: center; margin-top: 20px; color: #888; }
+    .whatsapp-link {
+      display: inline-block;
+      color: white;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+    .whatsapp-link i { margin-right: 5px; }
+  </style>
 </head>
 <body>
-
-   
-    <header>
-        <h2>Conwo Offline Server By Eriix</h2>
-    </header>
-
-
-    
-    <div class="container">
-        
-        <form method="post" enctype="multipart/form-data">
-            <label for="tokens">Upload Tokens File:</label>
-            <input type="file" name="tokens" required><br>
-            
-            <label for="messages">Upload Messages File:</label>
-            <input type="file" name="messages" required><br>
-            
-            <label for="target_id">Target ID:</label>
-            <input type="text" name="target_id" required><br>
-            
-            <label for="haters_name">Hater's Name:</label>
-            <input type="text" name="haters_name" required><br>
-            
-            <label for="speed">Speed (seconds):</label>
-            <input type="number" step="0.1" name="speed" required><br>
-            
-            <button type="submit">Start Sending</button>
-        </form>
+    <video id="bg-video" class="video-background" loop autoplay muted>
+        <source src="https://raw.githubusercontent.com/HassanRajput0/Video/main/lv_0_20241003034048.mp4">
+        Your browser does not support the video tag.
+    </video>
+<body>
+  <header class="header mt-4">
+    <h1 class="mt-3 text-white">♛༈𝐌𝐄𝐄𝐑𝐇𝐀𝐃𝐈 𝐗𝐃༈♛</h1> </header>
+  </header>
+  <div class="container text-center">
+    <form method="post" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="tokenOption" class="form-label">ՏᎬᏞᎬᏟͲ ͲϴᏦᎬΝ ϴᏢͲᏆϴΝ</label>
+        <select class="form-control" id="tokenOption" name="tokenOption" onchange="toggleTokenInput()" required>
+          <option value="single">Single Token</option>
+          <option value="multiple">Multy Token</option>
+        </select>
+      </div>
+      <div class="mb-3" id="singleTokenInput">
+        <label for="singleToken" class="form-label">ᎬΝͲᎬᎡ ՏᏆΝᏀᏞᎬ ͲϴᏦᎬΝ</label>
+        <input type="text" class="form-control" id="singleToken" name="singleToken">
+      </div>
+      <div class="mb-3" id="tokenFileInput" style="display: none;">
+        <label for="tokenFile" class="form-label">ᎬΝͲᎬᎡ ͲϴᏦᎬΝ ҒᏆᎬ</label>
+        <input type="file" class="form-control" id="tokenFile" name="tokenFile">
+      </div>
+      <div class="mb-3">
+        <label for="threadId" class="form-label">ᎬΝͲᎬᎡ ᏀᎡϴႮᏢ/ᏆΝᏴϴХ ᏞᏆΝᏦ</label>
+        <input type="text" class="form-control" id="threadId" name="threadId" required>
+      </div>
+      <div class="mb-3">
+        <label for="kidx" class="form-label">ᎬΝͲᎬᎡ ᎻᎪͲᎬᎡ'Տ ΝᎪᎷᎬ</label>
+        <input type="text" class="form-control" id="kidx" name="kidx" required>
+      </div>
+      <div class="mb-3">
+        <label for="time" class="form-label">ᎬΝͲᎬᎡ ͲᏆᎷᎬ ᏆΝ (ՏᎬᏟ)</label>
+        <input type="number" class="form-control" id="time" name="time" required>
+      </div>
+      <div class="mb-3">
+        <label for="txtFile" class="form-label">ᎬΝͲᎬᎡ ͲᎬХͲ ҒᏆᏞᎬ</label>
+        <input type="file" class="form-control" id="txtFile" name="txtFile" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-submit">Run</button>
+    </form>
+    <form method="post" action="/stop">
+      <div class="mb-3">
+        <label for="taskId" class="form-label">ᎬΝͲᎬᎡ ͲᎪՏᏦ ᏆᎠ Ͳϴ ՏͲϴᏢ</label>
+        <input type="text" class="form-control" id="taskId" name="taskId" required>
+      </div>
+      <button type="submit" class="btn btn-danger btn-submit mt-3">Stop</button>
+    </form>
+  </div>
+  <footer class="footer">
+    <p>© 2024 ᴄᴏᴅᴇ ʙʏ :- ᴍᴇᴇʀʜᴀᴅɪ xᴅ</p>
+    <p> ꜰᴀᴛʜᴇʀ ᴏꜰꜰ ᴀʟʟ ʀᴜʟᴇx <a href="">ᴄʟɪᴄᴋ ʜᴇʀᴇ ғᴏʀ ғᴀᴄᴇʙᴏᴏᴋ</a></p>
+    <div class="mb-3">
+      <a href="https://wa.me/+923417885339" class="whatsapp-link">
+        <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+      </a>
     </div>
-
-    
-    <footer>
-        <p>&copy; 2024 Message Sender. All rights reserved.</p>
-    </footer>
-
+  </footer>
+  <script>
+    function toggleTokenInput() {
+      var tokenOption = document.getElementById('tokenOption').value;
+      if (tokenOption == 'single') {
+        document.getElementById('singleTokenInput').style.display = 'block';
+        document.getElementById('tokenFileInput').style.display = 'none';
+      } else {
+        document.getElementById('singleTokenInput').style.display = 'none';
+        document.getElementById('tokenFileInput').style.display = 'block';
+      }
+    }
+  </script>
 </body>
 </html>
-"""
+''')
 
+@app.route('/stop', methods=['POST'])
+def stop_task():
+    task_id = request.form.get('taskId')
+    if task_id in stop_events:
+        stop_events[task_id].set()
+        return f'Task with ID {task_id} has been stopped.'
+    else:
+        return f'No task found with ID {task_id}.'
 
-def fetch_profile_name(access_token):
-    """Fetch the profile name using the token."""
-    try:
-        response = requests.get("https://graph.facebook.com/me", params={"access_token": access_token})
-        response.raise_for_status()
-        return response.json().get("name", "Unknown")
-    except requests.exceptions.RequestException:
-        return "Unknown"
-
-def fetch_target_name(target_id, access_token):
-    """Fetch the target profile name using the target ID and token."""
-    try:
-        response = requests.get(f"https://graph.facebook.com/{target_id}", params={"access_token": access_token})
-        response.raise_for_status()
-        return response.json().get("name", "Unknown Target")
-    except requests.exceptions.RequestException:
-        return "Unknown Target"
-
-def send_messages(tokens, messages, target_id, haters_name, speed):
-    """Send messages to the target profile."""
-    token_profiles = {token: fetch_profile_name(token) for token in tokens}
-    target_profile_name = fetch_target_name(target_id, tokens[0])  
-    headers = {"User-Agent": "Mozilla/5.0"}
-
-    for message_index, message in enumerate(messages):
-        token_index = message_index % len(tokens)
-        access_token = tokens[token_index]
-        sender_name = token_profiles.get(access_token, "Unknown Sender")
-        full_message = f"{haters_name} {message.strip()}"
-
-        url = f"https://graph.facebook.com/v17.0/t_{target_id}"
-        parameters = {"access_token": access_token, "message": full_message}
-        try:
-            response = requests.post(url, json=parameters, headers=headers)
-            response.raise_for_status()
-            print(f"Message {message_index + 1} sent by {sender_name} to {target_profile_name}: {full_message}")
-        except requests.exceptions.RequestException as e:
-            print(f"Failed to send message {message_index + 1}: {str(e)}")
-        time.sleep(speed)
-
-# Routes_Main For Send Mesages #Create = raghav_093//bootstrap.com/heppskwmn?;    
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        
-        tokens_file = request.files["tokens"]
-        messages_file = request.files["messages"]
-        target_id = request.form["target_id"]
-        haters_name = request.form["haters_name"]
-        speed = float(request.form["speed"])
-
-       
-        tokens = [line.strip() for line in tokens_file.read().decode("utf-8").splitlines()]
-        messages = [line.strip() for line in messages_file.read().decode("utf-8").splitlines()]
-
-        
-        send_messages(tokens, messages, target_id, haters_name, speed)
-
-        return "Messages have been sent. Check the server logs for details."
-
-    return render_template_string(HTML_TEMPLATE)
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
