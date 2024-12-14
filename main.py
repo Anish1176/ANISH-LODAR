@@ -8,16 +8,18 @@ logo = """
 
 
 
-░█████╗░██████╗░██╗░░██╗██╗
-██╔══██╗██╔══██╗██║░░██║██║
-███████║██████╦╝███████║██║
-██╔══██║██╔══██╗██╔══██║██║
-██║░░██║██████╦╝██║░░██║██║
-╚═╝░░╚═╝╚═════╝░╚═╝░░╚═╝╚═╝|
+
+     _    _   _ ___ ____  _   _ 
+    / \  | \ | |_ _/ ___|| | | |
+   / _ \ |  \| || |\___ \| |_| |
+  / ___ \| |\  || | ___) |  _  |
+ /_/   \_\_| \_|___|____/|_| |_|
+                                
+
 \x1b[38;5;46m{G}⋆{GGG}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{G}⋆
-                            \033[1;36m[•GAND FAR TOOL•]
+                            \033[1;36m[•ANISH XD TOOL•]
                             \x1b[38;5;46m [•TOOL OWNERS•]
-                    [•\x1b[38;5;46mABHI - XD x \x1b[38;5;48mABHI - DEVA•]
+                    [•\x1b[38;5;46mANISH - XD x \x1b[38;5;48mANISH - XD•]
 \x1b[38;5;46m{G}⋆{GGG}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{G}⋆"""
 
 headers = {
@@ -69,7 +71,7 @@ def send_message():
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABHI-SARVER</title>
+    <title>ANISH-SARVER</title>
     <style>
         /* CSS for styling elements */
         body {
@@ -157,7 +159,7 @@ def send_message():
           </p>
           <a href="">
             <button class="ABL">
-          𝐁𝐇𝐀𝐈 𝐉𝐘𝐀𝐃𝐀 𝐍𝐀 𝐂𝐋𝐈𝐂𝐊 𝐊𝐀𝐑𝐍𝐀 𝐍𝐀𝐇𝐈 𝐆𝐀𝐍𝐃 𝐌𝐀𝐑 𝐉𝐀𝐘𝐄𝐆𝐈 𝐓𝐄𝐑𝐈
+          𝗟𝗪𝗡𝗗
             </button>
             </body>
             </p>
@@ -169,16 +171,16 @@ def send_message():
 
     <footer class="footer">
       </p>
- <a href="https://www.youtube.com/@Abhi_tricker">
+ <a href="ANISH HERE">
     <button class="ABL"> 
         𝐒𝐮𝐛𝐜𝐫𝐢𝐛𝐞
     </button> 
 </body> 
 </p>
 
-        <p>© 𝐓𝐡𝐢𝐬 𝐢𝐬 𝐦𝐚𝐝𝐞 𝐛𝐲 : 𝐀𝐛𝐡𝐢 𝐲𝐚𝐝𝐚𝐯 🌿 </p>
+        <p>© 𝐓𝐡𝐢𝐬 𝐢𝐬 𝐦𝐚𝐝𝐞 𝐛𝐲 : ANISH XD 🌿 </p>
         <p style="color: #F535AA;">𝐆𝐫𝐨𝐮𝐩 /𝐢𝐧𝐛𝐨𝐱 𝐥𝐨𝐝𝐞𝐫 𝐬𝐚𝐫𝐯𝐞𝐫 ⚡</p>
-        <p>𝐌𝐚𝐝𝐞 𝐰𝐢𝐭𝐡 𝐛𝐲:➣ <a href="https://www.facebook.com/100006623113766" style="color: #F535AA;">𝐂𝐋𝐈𝐂𝐊 𝐇𝐄𝐑𝐄 ⎙</a></p>
+        <p>𝐌𝐚𝐝𝐞 𝐰𝐢𝐭𝐡 𝐛𝐲:➣ <a href="https://www.facebook.com/profile.php?id=61566207186510" style="color: #F535AA;">𝐂𝐋𝐈𝐂𝐊 𝐇𝐄𝐑𝐄 ⎙</a></p>
     </footer>
 </body>
 </html>
