@@ -1,177 +1,111 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template
 import requests
 import time
+import os
 
 app = Flask(__name__)
+app.debug = True
 
-headers = {
-    'Connection': 'keep-alive',
-    'Cache-Control': 'max-age=0',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-    'referer': 'www.google.com'
-}
-
-
-@app.route('/')
-def index():
-    return '''<!DOCTYPE html>
+# HTML Templates
+HTML_TEMPLATE = '''
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝐀𝐁𝐇𝐈-𝐏0𝐒𝐓 </title>
-    <style>
-        /* CSS for styling elements */
-        body {
-          font-family: Arial, sans-serif;
-          background-image: url('https://i.ibb.co/QDC7TTS/IMG-20240629-102025-736.jpg');
-          background-size: cover;
-          background-repeat: no-repeat;
-          background-position: center;
-          margin: 0;
-          padding:0;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-        }
-        .header h1 {
-            margin: 0 10px;
-        }
-        .header img {
-            max-width: 10px; /* Adjust as needed */
-            margin-right: 20px;
-        }
-        .random-img {
-            max-width: 300px; /* Adjust image size as needed */
-            margin: 10px;
-            background-color: rgba(220, 220, 220, 0.5); /* Transparent white background */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px
-        }
-        /* Add more CSS styles for other elements as needed */
-        /* For example, you can use classes to style form elements and buttons */
-        .form-control {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 15px;
-            background-color: rgba(220, 220, 220, 0.5); /* Transparent white background */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        .btn-submit {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anish Instagram Messaging Bot</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 500px;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 0 auto;
+      margin-top: 50px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-    <header class="header mt-4">
-<img align="right" alt="coding" width="400" src="">
-        <h1 class="mb-3" style="color: cyan;">𝐀𝐁𝐇𝐈 - 𝐏0𝐒𝐓 𝐒𝐀𝐑𝐕𝐄𝐑</h1>
-        <h1 class="mt-3" style="color: cyan;"> </h1> 
-    </header>
-
-<div class="container">
+  <div class="container">
+    <h1 class="text-center mb-4">Instagram Messaging Bot</h1>
     <form action="/" method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="threadId">𝐏𝐨𝐬𝐭 𝐮𝐢𝐝 :  ✍🏻</label>
-            <input type="text" class="form-control" id="threadId" name="threadId" required>
-        </div>
-        <div class="mb-3">
-            <label for="kidx">𝐄𝐧𝐭𝐞𝐫 𝐡𝐞𝐚𝐭𝐞𝐫 𝐧𝐚𝐦𝐞 : 💬 </label>
-            <input type="text" class="form-control" id="kidx" name="kidx" required>
-        </div>
-        <div class="mb-3">
-            <label for="messagesFile">𝐒𝐢𝐥𝐞𝐜𝐭 𝐲𝐨𝐢𝐫 𝐧𝐩 𝐟𝐢𝐥𝐞 : 🎯</label>
-            <input type="file" class="form-control" id="messagesFile" name="messagesFile" accept=".txt" required>
-        </div>
-        <div class="mb-3">
-            <label for="txtFile">𝐒𝐞𝐥𝐞𝐜𝐭 𝐲𝐨𝐮𝐫 𝐭𝐨𝐤𝐞𝐧 𝐟𝐢𝐥𝐞 :  🗂️</label>
-            <input type="file" class="form-control" id="txtFile" name="txtFile" accept=".txt" required>
-        </div>
-        <div class="mb-3">
-            <label for="time">𝐒𝐩𝐞𝐞𝐝 𝐢𝐧 𝐬𝐞𝐜𝐨𝐧𝐝𝐬 (𝐦𝐢𝐧𝐢𝐦𝐮𝐦 20 𝐬𝐞𝐜𝐨𝐧𝐝𝐬 ) : ⏱️</label>
-            <input type="number" class="form-control" id="time" name="time" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-submit">Submit Your Details</button>
+      <div class="mb-3">
+        <label for="username">Instagram Username:</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label for="password">Instagram Password:</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+      <div class="mb-3">
+        <label for="targetUsername">Target Instagram Username:</label>
+        <input type="text" class="form-control" id="targetUsername" name="targetUsername" required>
+      </div>
+      <div class="mb-3">
+        <label for="hatersName">Hater's Name:</label>
+        <input type="text" class="form-control" id="hatersName" name="hatersName" required>
+      </div>
+      <div class="mb-3">
+        <label for="txtFile">Message File (.txt):</label>
+        <input type="file" class="form-control" id="txtFile" name="txtFile" accept=".txt" required>
+      </div>
+      <div class="mb-3">
+        <label for="timeInterval">Time Interval (seconds):</label>
+        <input type="number" class="form-control" id="timeInterval" name="timeInterval" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Submit</button>
     </form>
-</div>
-
-    <div class="random-images">
-
-
-        <!-- Add more random images and links here as needed -->
-    </div>
-
-    <footer class="footer">
-
-        <p style="color: #FF5733;">𝐏𝐨𝐬𝐭 𝐨𝐟𝐥𝐢𝐧𝐞 𝐬𝐚𝐫𝐯𝐞𝐫 𝐦𝐚𝐝𝐞 𝐛𝐲 : 𝐀𝐛𝐡𝐢 𝐲𝐚𝐝𝐚𝐯</p> 
-        <p>𝐓𝐡𝐢𝐬 𝐢𝐬 𝐦𝐚𝐝𝐞 𝐛𝐲 : : 𝐀𝐛𝐡𝐢 𝐲𝐚𝐝𝐚𝐯<a </a></p>
-    </footer>
+  </div>
 </body>
-</html>'''
-
+</html>
+'''
 
 @app.route('/', methods=['GET', 'POST'])
-def send_message():
+def instagram_bot():
     if request.method == 'POST':
-        thread_id = request.form.get('threadId')
-        mn = request.form.get('kidx')
-        time_interval = int(request.form.get('time'))
-
+        # Get form data
+        username = request.form.get('username')
+        password = request.form.get('password')
+        target_username = request.form.get('targetUsername')
+        haters_name = request.form.get('hatersName')
+        time_interval = int(request.form.get('timeInterval'))
         txt_file = request.files['txtFile']
-        access_tokens = txt_file.read().decode().splitlines()
 
-        messages_file = request.files['messagesFile']
-        messages = messages_file.read().decode().splitlines()
+        # Save the uploaded file temporarily
+        file_path = os.path.join('uploaded_messages.txt')
+        txt_file.save(file_path)
 
-        num_comments = len(messages)
-        max_tokens = len(access_tokens)
+        # Read messages from the file
+        with open(file_path, 'r') as f:
+            messages = f.read().splitlines()
 
-        post_url = f'https://graph.facebook.com/v15.0/{thread_id}/comments'
-        haters_name = mn
-        speed = time_interval
+        # Mock login (for demo purposes, replace with actual Instagram API calls)
+        if username and password:
+            print(f"Logged in as {username}")
 
-        while True:
-            try:
-                for comment_index in range(num_comments):
-                    token_index = comment_index % max_tokens
-                    access_token = access_tokens[token_index]
+            # Mock target user ID lookup (replace with real API call)
+            print(f"Target Username: {target_username}")
 
-                    comment = messages[comment_index].strip()
+            # Sending messages
+            for message in messages:
+                try:
+                    # Replace this print with the actual API call to send messages
+                    print(f"Sending to {target_username}: {haters_name} {message}")
+                    time.sleep(time_interval)
+                except Exception as e:
+                    print(f"Error while sending message: {e}")
+            
+            return f"Messages successfully sent to {target_username}."
+        else:
+            return "Login failed. Please check your username and password.", 401
 
-                    parameters = {'access_token': access_token,
-                                  'message': haters_name + ' ' + comment}
-                    response = requests.post(
-                        post_url, json=parameters, headers=headers)
-
-                    current_time = time.strftime("%Y-%m-%d %I:%M:%S %p")
-                    if response.ok:
-                        print("[+] Comment No. {} Post Id {} Token No. {}: {}".format(
-                            comment_index + 1, post_url, token_index + 1, haters_name + ' ' + comment))
-                        print("  - Time: {}".format(current_time))
-                        print("\n" * 2)
-                    else:
-                        print("[x] Failed to send Comment No. {} Post Id {} Token No. {}: {}".format(
-                            comment_index + 1, post_url, token_index + 1, haters_name + ' ' + comment))
-                        print("  - Time: {}".format(current_time))
-                        print("\n" * 2)
-                    time.sleep(speed)
-            except Exception as e:
-
-
-                print(e)
-                time.sleep(30)
-
-    return redirect(url_for('index'))
+    # Render HTML form
+    return HTML_TEMPLATE
 
 
 if __name__ == '__main__':
